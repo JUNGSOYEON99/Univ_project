@@ -16,29 +16,54 @@
 	var menu_data;
 	var iden;
 	
-	let today = new Date();   
+	let today = new Date(); 
+	let yea_r = today.getFullYear();
+	let mont_h = today.getMonth() + 1;
 	let date = today.getDate();
 	
 	function showinsertMenuPlan(year,month,day){
+		var year = year;
 		var month = month;
 		var day = day;
 		var select;
 		//1-9일 앞에 0 붙여서 01-09로 표시
-		if (parseInt(Number(day) / 10) == 0){ 
-			select = year + '-' + month + '-0' + day;
+		if (parseInt(Number(month) / 10) == 0){ 
+			if (parseInt(Number(day) / 10) == 0){ 
+				select = year + '-0' + month + '-0' + day;
+			} else {
+				select = year + '-0' + month + '-' + day;	
+			}
 		} else {
-			select = year + '-' + month + '-' + day;	
+			if (parseInt(Number(day) / 10) == 0){ 
+				select = year + '-' + month + '-0' + day;
+			} else {
+				select = year + '-' + month + '-' + day;	
+			}
 		}
 		
 		$('input[name=SelectDate]').attr('value',select); 
 		$("#insertSelectday").html("< "+select+" > 식단 등록");
 		$("#modiSelectday").html("< "+select+" > 식단 수정");
 		
-		if(parseInt(Number(date)) <= parseInt(Number(day))){
-			insertTodayMenu(select);
-		} else if(parseInt(Number(date)) >= parseInt(Number(day))){
-			$("#select_modaltitle").html("< "+select+" > 식단");
-			showTodayMenu(select);
+		if(parseInt(Number(yea_r)) <= parseInt(Number(year))){
+			if(parseInt(Number(mont_h)) < parseInt(Number(month))){
+				insertTodayMenu(select);
+			}else if(parseInt(Number(mont_h)) == parseInt(Number(month))){
+				if(parseInt(Number(date)) < parseInt(Number(day))){
+					insertTodayMenu(select);
+				} else{
+					$("#select_modaltitle").html("< "+select+" > 식단");
+					showTodayMenu(select);
+				}
+			}
+		} else if(parseInt(Number(yea_r)) > parseInt(Number(year))){
+			if(parseInt(Number(month)) < parseInt(Number(mont_h))){
+				$("#select_modaltitle").html("< "+select+" > 식단");
+				showTodayMenu(select);
+			} else {
+				$("#select_modaltitle").html("< "+select+" > 식단");
+				showTodayMenu(select);
+			}	
 		}
 	}
 	//선택한 날짜에 등록되어 있는 식단 출력 (오늘 날짜보다 이전인 경우)
@@ -360,46 +385,68 @@
 					</tr>
 				</thead>
 				<tbody>
-				<tr>
-					<c:forEach var="dateList" items="${dateList}" varStatus="date_status">
-					<c:choose>
-					<c:when test="${dateList.value == 'today'}">
-					<c:if test="${date_status.index % 7 == 0}">
-						<tr>
-					</c:if>
-						<td class="today"  onclick="location.href='/owner/main'">
-							<div class="date">
-	  				</c:when>
-					<c:when test="${date_status.index % 7 == 6}">
-						<td class="sat_day">
-							<div class="sat">
-					</c:when>
-					<c:when test="${date_status.index % 7 == 0}">
-				</tr>
-				<tr>
+					<tr>
+						<c:forEach var="dateList" items="${dateList}" varStatus="date_status">
+							<c:choose>
+								<c:when test="${dateList.value == 'today'}">
+									<td class="today"  onclick="location.href='/owner/main'">
+										<div class="date">
+											${dateList.date}
+											<div id="menuplan_day">
+												<c:forEach var="ateuserList" items="${dateList.selectDayMenulist}" varStatus="ateuser_status">
+													<c:if test="${ateuserList.today_date != null}"> 
+														<div style="text-align:center;">
+							                               <i class="fas fa-utensils" style="font-size:20px;"></i>
+							                            </div>
+													</c:if>
+												</c:forEach>
+												<br>
+											</div>
+										</div>
+										<div>
+										</div>
+									</td>
+		  						</c:when>
+								<c:when test="${date_status.index % 7 == 6}">
+									<td class="sat_day">
+										<div class="sat">
+											${dateList.date}
+										</div>
+										<div>
+										</div>
+									</td>
+								</c:when>
+								<c:when test="${date_status.index % 7 == 0}">
+					</tr>
+					<tr>
 						<td class="sun_day">
 							<div class="sun">
-					</c:when>
-	 				<c:otherwise>
-						<td class="normal_day" onclick="showinsertMenuPlan('${today_info.search_year}','${today_info.search_month}','${dateList.date}')">
-							<div class="date">
-					</c:otherwise>
-					</c:choose>
-							${dateList.date}
+								${dateList.date}
 							</div>
-							<div id="menuplan_day">
-								<c:forEach var="ateuserList" items="${dateList.selectDayMenulist}" varStatus="ateuser_status">
-									<c:if test="${ateuserList.today_date != null}"> 
-										<div style="text-align:center;">
-			                               <i class="fas fa-utensils" style="font-size:20px;"></i>
-			                            </div>
-									</c:if>
-								</c:forEach>
-								<br>
+							<div>
 							</div>
 						</td>
-					</c:forEach>
-			</tbody>
+								</c:when>
+		 						<c:otherwise>
+						<td class="normal_day" onclick="showinsertMenuPlan('${today_info.search_year}','${today_info.search_month}','${dateList.date}')">
+							<div class="date">
+								${dateList.date}
+								<div id="menuplan_day">
+									<c:forEach var="ateuserList" items="${dateList.selectDayMenulist}" varStatus="ateuser_status">
+										<c:if test="${ateuserList.today_date != null}"> 
+											<div style="text-align:center;">
+				                               <i class="fas fa-utensils" style="font-size:20px;"></i>
+				                            </div>
+										</c:if>
+									</c:forEach>
+									<br>
+								</div>
+							</div>
+						</td>
+								</c:otherwise>
+							</c:choose>
+						</c:forEach>
+				</tbody>
 			</table>
 		</div>
 	</form>
